@@ -6,6 +6,7 @@ const secret_key = process.env.JWT_SECRET
 const { body, validationResult } = require('express-validator');
 const {data, user_controls} = require('../models/datas');
 const { pendaftaran } = require('../models/pendaftaranData');
+const WebSocket = require('ws')
 
 exports.daftar = (req, res) => {
     const authHeader = req.get('Authorization')
@@ -58,4 +59,19 @@ exports.nomorPendaftaran = (req, res) => {
             return res.status(200).json({noDaftar: data.nomor_pendaftaran, tanggal_pendaftaran: data.tanggal_pendaftaran})
         })
       })
+}
+
+exports.antrian = (req, res) => {
+  const wss = new WebSocket.Server({port : 5000})
+  const clients = new Set()
+
+  wss.on('connection', (ws) => {
+    clients.add(ws)
+    ws.on('message', (message => {
+      const data = JSON.parse(message)
+      if (data.type === 'subscribe' && data.channel === 'confirmation') {
+        
+      }
+    }))
+  })
 }

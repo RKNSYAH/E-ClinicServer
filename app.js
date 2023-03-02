@@ -8,6 +8,8 @@ const login = require('./controller/LoginControl');
 const klinik = require('./controller/KlinikControl');
 const profile = require('./controller/ProfileControl');
 const daftar = require('./controller/DaftarControl');
+const crypto = require('crypto')
+
 var useragent = require('express-useragent');
 
 app.use(express.urlencoded({extended: true}));
@@ -50,6 +52,8 @@ app.get('/keahlian', klinik.getKeahlian)
 app.get('/darah', data.getGolonganDarah)
 app.post('/daftar', daftar.daftar)
 app.post('/nodaftar', daftar.nomorPendaftaran)
+app.post('/antri', daftar.antrian)
+
 
 const PORT = 5000;
 
