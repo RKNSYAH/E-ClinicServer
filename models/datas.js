@@ -96,11 +96,11 @@ const user_controls = sequelize.define('user_controls',{
         type: Sequelize.TEXT,
         allowNull: true
       },
-      level: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        defaultValue: 1 // 1: USER, 2: DOKTER, 3: ADMIN, 4: SUPERADMIN
-      }
+      // level: {
+      //   type: Sequelize.INTEGER,
+      //   allowNull: true,
+      //   defaultValue: 1 // 1: USER, 2: DOKTER, 3: ADMIN, 4: SUPERADMIN
+      // }
     }, {
       tableName: 'user_controls',
       schema: 'users',

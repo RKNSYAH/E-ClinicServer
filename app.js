@@ -8,12 +8,26 @@ const login = require('./controller/LoginControl');
 const klinik = require('./controller/KlinikControl');
 const profile = require('./controller/ProfileControl');
 const daftar = require('./controller/DaftarControl');
-const crypto = require('crypto')
-
+const WebSocket = require('ws')
 var useragent = require('express-useragent');
+const { pendaftaran } = require('./models/pendaftaranData');
+const { v4: uuidv4 } = require('uuid');
 
 app.use(express.urlencoded({extended: true}));
 app.use(useragent.express());
+
+const wss = new WebSocket.Server({port : 8080})
+const userConnections = {};
+
+wss.on('connection', (ws, req) => {
+
+  ws.on('message', (message => {
+    const data = JSON.parse(message)
+    console.log(data);
+    if(data.channel === 'confirmation')
+    return userConnections[data.data] = ws
+  }))
+})
 
 app.use(express.json());
 app.use(bodyParser.json());
@@ -52,7 +66,30 @@ app.get('/keahlian', klinik.getKeahlian)
 app.get('/darah', data.getGolonganDarah)
 app.post('/daftar', daftar.daftar)
 app.post('/nodaftar', daftar.nomorPendaftaran)
-app.post('/antri', daftar.antrian)
+app.post('/antri', (req, res) => {
+  pendaftaran
+    .findOne({
+      where: {
+        pendaftaran_id: req.body.pendaftaran_id,
+      },
+    })
+    .then((daftar) => {
+      if (!daftar) return;
+      const message = JSON.stringify({
+        type: "confirmation",
+        data: "confirmed",
+      });
+      const pendaftaran = req.body.noPendaftaran;
+
+      const ws = userConnections[pendaftaran];
+      if (ws) {
+        ws.send(message);
+      }
+
+      res.sendStatus(200);
+    });
+
+})
 
 
 const PORT = 5000;

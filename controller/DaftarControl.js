@@ -6,7 +6,10 @@ const secret_key = process.env.JWT_SECRET
 const { body, validationResult } = require('express-validator');
 const {data, user_controls} = require('../models/datas');
 const { pendaftaran } = require('../models/pendaftaranData');
-const WebSocket = require('ws')
+const WebSocket = require('ws');
+const main = require('../app');
+const { klinik } = require('../models/dokterdata');
+
 
 exports.daftar = (req, res) => {
     const authHeader = req.get('Authorization')
@@ -24,13 +27,16 @@ exports.daftar = (req, res) => {
         } catch (err) {
           return res.status(500).json({alert: 'Daftar Error Coba Lagi Nanti'});
         }
-        pendaftaran.create({
-            pasien_id : req.body.pasien_id,
-            dokter_id : req.body.dokter_id,
-            nomor_pendaftaran : Math.floor(Math.random() * 10000)  //nomor pendaftaran merupakan angka acak maks 4 digit
+        klinik.findOne({where: {nama_klinik: req.body.klinik}}).then((klinik) => {
+          pendaftaran.create({
+              pasien_id : req.body.pasien_id,
+              dokter_id : req.body.dokter_id,
+              klinik_id : klinik.klinik_id,
+              nomor_pendaftaran : Math.floor(Math.random() * 100000)  //nomor pendaftaran merupakan angka acak maks 5 digit
+        })
         }).then(data => {
             return res.status(200).json({alert: 'Daftar Berhasil'})
-        })
+        }).catch(err => console.log(err))
       })
 }
 
@@ -62,16 +68,7 @@ exports.nomorPendaftaran = (req, res) => {
 }
 
 exports.antrian = (req, res) => {
-  const wss = new WebSocket.Server({port : 5000})
-  const clients = new Set()
 
-  wss.on('connection', (ws) => {
-    clients.add(ws)
-    ws.on('message', (message => {
-      const data = JSON.parse(message)
-      if (data.type === 'subscribe' && data.channel === 'confirmation') {
-        
-      }
-    }))
-  })
+
+
 }

@@ -13,7 +13,7 @@ const pendaftaran = sequelize.define(
     },
     pasien_id: {
       type: Sequelize.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: {tableName: 'userdata', schema: 'public'},
         key: 'pasen_id',
@@ -26,6 +26,14 @@ const pendaftaran = sequelize.define(
         model: {tableName: 'dokter', schema: 'public'},
         key: 'dokter_id',
       },
+    },
+    klinik_id : {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: {
+        model : {tableName: 'klinik', schema: 'public'},
+        key: 'klinik_id'
+      }
     },
     tanggal_pendaftaran: {
       type: Sequelize.DATE,
