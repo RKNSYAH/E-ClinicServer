@@ -19,7 +19,7 @@ module.exports = {
             tableName: 'userdata',
             schema: 'public',
           },
-          key: 'pasen_id'
+          key: 'pasien_id'
         }
       },
       is_login: {

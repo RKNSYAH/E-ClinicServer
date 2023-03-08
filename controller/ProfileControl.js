@@ -42,7 +42,6 @@ exports.updatetoken = (req, res, next) => {
   };
   
   exports.update = [
-          //TODO: tambah validasi data dengan express-validator
           body('rw').isLength({max: 3}).withMessage('RT/RW Tidak Valid').isNumeric(),
           body('rt').isLength({max: 3}).withMessage('RT/RW Tidak Valid').isNumeric(),
           body('alamat').escape(true),
@@ -105,7 +104,7 @@ exports.updatetoken = (req, res, next) => {
                 },
                 {
                   where: {
-                    pasen_id: req.body.id,
+                    pasien_id: req.body.id,
                   },
                 },
               )
@@ -121,10 +120,10 @@ exports.updatetoken = (req, res, next) => {
   
   exports.profilerefresh = (req, res, next) => {
     //refresh data yang tersimpan pada client dengan data terbaru
-    data.findOne({where: {pasen_id: req.body}}).then(nik => {
+    data.findOne({where: {pasien_id: req.body}}).then(nik => {
       if(nik){
         res.status(200).json({
-              id: nik.pasen_id,
+              id: nik.pasien_id,
               namalengkap: nik.namalengkap,
               nik: nik.nik,
               email: nik.email,

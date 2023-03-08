@@ -13,7 +13,7 @@ module.exports = {
     await queryInterface.createTable(
       'userdata',
       {
-        pasen_id: {
+        pasien_id: {
           type: Sequelize.UUID,
           defaultValue: Sequelize.UUIDV4,
           primaryKey: true,
@@ -21,6 +21,10 @@ module.exports = {
         },
         email: {
           type: Sequelize.STRING(30),
+        },
+        no_telp: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
         },
         password: {
           type: Sequelize.STRING,
@@ -69,7 +73,7 @@ module.exports = {
             name: "master_user_pkey",
             unique: true,
             fields: [
-              { name: "pasen_id" },
+              { name: "pasien_id" },
             ]
           },
         ]

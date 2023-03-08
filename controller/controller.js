@@ -6,10 +6,13 @@ const crypto = require('crypto')
 const secret_key = process.env.JWT_SECRET
 const {wilayah, golongan_darah} = require('../models/dokterdata');
 const { body, validationResult } = require('express-validator');
+const sendEmail = require('../utils/sendEmail');
+const Sequelize = require('sequelize');
+const useragent = require('express-useragent');
 
 exports.findAll = (req, res) => {
   data
-    .count('pasen_id')
+    .count('pasien_id')
     .then(id => { 
       res.json({id: id});
     })
@@ -44,7 +47,6 @@ exports.wilayah = (req, res) => {
         });
       }
     }
-
     if (isNaN(query) && query) {
       let filterData = result.filter(item =>
         item.Kelurahan.toLowerCase().includes(query.toLowerCase()),
@@ -64,29 +66,29 @@ exports.getGolonganDarah = (req, res) => {
 
 exports.signup = [
   // Validasi data pendaftaran menggunakan express-validator untuk menghindari sql injection
-  body('email').isEmail().withMessage('Email Tidak Valid'),
-  body('sPassword')
-    .isLength({min: 7})
-    .withMessage('Password Minimal 7 Karakter'),
-  body('sNamaLengkap').escape(true),
-  body('sNik')
-    .isLength({min: 16,max: 16})
+  body("email").isEmail().withMessage("Email Tidak Valid"),
+  body("sPassword")
+    .isLength({ min: 8})
+    .withMessage("Password Minimal 7 Karakter"),
+  body("sNamaLengkap").trim().escape(true),
+  body("sNik")
+    .isLength({min:16, max: 16 })
     .isNumeric()
-    .withMessage('NIK Tidak Valid')
-    .escape(true),  
+    .escape(true)
+    .withMessage("NIK Tidak Valid"),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res
         .status(400)
-        .json({alert: errors.array().map(items => items.msg)[0]});
+        .json({ alert: errors.array().map((items) => items.msg)[0] });
     }
 
     data
-      .findOne({where: {email: req.body.email}})
-      .then(async user => {
+      .findOne({ where: { email: req.body.email } })
+      .then(async (user) => {
         if (user) {
-          return await res.status(409).json({alert: 'Email sudah dipakai'});
+          return await res.status(409).json({ alert: "Email sudah dipakai" });
         } else if (
           req.body.sPassword &&
           req.body.email &&
@@ -97,7 +99,7 @@ exports.signup = [
             if (err) {
               return res
                 .status(500)
-                .json({alert: 'Gagal membuat akun coba lagi'});
+                .json({ alert: "Gagal membuat akun coba lagi" });
             } else if (passwordHash) {
               return data
                 .create({
@@ -105,19 +107,24 @@ exports.signup = [
                   password: passwordHash,
                   nik: req.body.sNik,
                   namalengkap: req.body.sNamaLengkap,
+                  no_telp: req.body.noTelp || null
                 })
                 .then(() => {
-                  data.findOne({where : {email: req.body.email}}).then(user => {
-                    user_controls.create({
-                      id_user: user.pasen_id,
-                      level: 1
-                    })
-                  })
-                  res.status(200).json({alert: 'Berhasil membuat akun'});
+                  data
+                    .findOne({ where: { email: req.body.email } })
+                    .then((user) => {
+                      user_controls.create({
+                        id_user: user.pasien_id,
+                        level: 1,
+                      });
+                    });
+                  res.status(200).json({ alert: "Berhasil membuat akun" });
                 })
-                .catch(err => {
+                .catch((err) => {
                   console.log(err);
-                  res.status(502).json({alert: 'Gagal membuat akun coba lagi'});
+                  res
+                    .status(502)
+                    .json({ alert: "Gagal membuat akun coba lagi" });
                 });
             }
           });
@@ -127,12 +134,83 @@ exports.signup = [
           !req.body.sNik ||
           !req.body.sNamaLengkap
         ) {
-          return res.status(400).json({alert: 'Tolong lengkapi data anda'});
+          return res.status(400).json({ alert: "Tolong lengkapi data anda" });
         }
       })
-      .catch(err => {
-        console.log('error', err);
+      .catch((err) => {
+        console.log("error", err);
       });
   },
-]; 
+];
 
+exports.forgotPassword = [
+  body("email").isEmail().withMessage("Email Tidak Valid"),
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({ alert: errors.array().map((items) => items.msg)[0] });
+    }
+    data.findOne({where : Sequelize.where(Sequelize.Sequelize.fn('lower', Sequelize.col('email')), Sequelize.Sequelize.fn('lower', req.body.email))}).then(async (data) => {
+      if (!data) {return res.status(404).json({ alert: 'Akun tidak ditemukan'})}
+      const token = await jwt.sign({id: data.pasien_id}, secret_key, {
+        expiresIn: '30m',
+      })
+      const link = `10.10.10.91:5000/passwordReset?token=${token}`
+      sendEmail(data.email,"Password Reset Request",{name: data.namalengkap,link: link,},"../utils/template/forgotPassword.handlebars");
+      res.status(200).json({ alert: 'Email terkirim'});
+      return link
+    })
+  },
+];
+
+exports.passwordReset = (req, res) => {
+  const token = req.query.token
+  const agent = req.useragent
+  let decodedToken;
+  try {
+    decodedToken = jwt.verify(token, secret_key);
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({alert: 'Tautan sudah kadaluarsa. Silakan buat permintaan reset kata sandi baru.'});
+  }
+  if (!decodedToken) {
+    return res.status(401).json({alert: 'Unauthorized'});
+  }
+  if(agent.platform === 'Android'){
+    return res.redirect(`eclinic://resetPassword/${decodedToken.id}`)
+  }
+}
+
+exports.setPassword = [
+  body('password').isLength({min: 8}).withMessage('Password Minimal 8 Karakter'),
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(400)
+        .json({alert: errors.array().map(items => items.msg)[0]});
+    }
+    const passwordHash = await bcrypt.hash(req.body.password, 12)
+    if(passwordHash){
+      return data.update(
+        {
+          password: passwordHash
+        },
+        {
+          where: {pasien_id : req.body.id}
+        }
+      ).then((data) => {
+        if (data){
+          res.status(200).json({alert: 'Berhasil update pasword'})
+        }
+      }).catch(err => {
+        console.log(err);
+      })
+    }
+
+  }
+]

@@ -29,7 +29,15 @@ module.exports = {
         allowNull: false,
         references: {
           model: { tableName: 'userdata', schema: 'public' },
-          key: 'pasen_id'
+          key: 'pasien_id'
+        }
+      },
+      klinik_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model : {tableName: 'klinik', schema: 'public'},
+          key: 'klinik_id'
         }
       },
       waktu_antrian: {

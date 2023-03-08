@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('./connection.js');
 const moment = require('moment');
 
+
 const pendaftaran = sequelize.define(
   'pendaftaran',
   {
@@ -16,7 +17,7 @@ const pendaftaran = sequelize.define(
       allowNull: true,
       references: {
         model: {tableName: 'userdata', schema: 'public'},
-        key: 'pasen_id',
+        key: 'pasien_id',
       },
     },
     dokter_id: {
@@ -43,9 +44,21 @@ const pendaftaran = sequelize.define(
         return moment(this.getDataValue('tanggal_pendaftaran')).locale('id').format('dddd, DD MMMM YYYY h:mm:ss');
     }
     },
+    tanggal_perjanjian: {
+      type: Sequelize.DATEONLY,
+      allowNull: true,
+      get() {
+        return moment(this.getDataValue('tanggal_perjanjian')).locale('id').format('dddd, DD MMMM YYYY h:mm:ss');
+    }
+    },
     nomor_pendaftaran: {
       type: Sequelize.BIGINT,
       allowNull: true,
+    },
+    confirmed: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
+      allowNull: true
     },
   },
   {
@@ -84,8 +97,16 @@ const antrian = sequelize.define(
       allowNull: false,
       references: {
         model: {tableName: 'userdata', schema: 'public'},
-        key: 'pasen_id',
+        key: 'pasien_id',
       },
+    },
+    klinik_id : {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: {
+        model : {tableName: 'klinik', schema: 'public'},
+        key: 'klinik_id'
+      }
     },
     waktu_antrian: {
       type: Sequelize.DATE,

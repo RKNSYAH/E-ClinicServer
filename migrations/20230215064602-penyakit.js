@@ -31,7 +31,7 @@ module.exports = {
           allowNull: false,
           references: {
             model: { tableName: 'userdata', schema: 'public' },
-            key: 'pasen_id'
+            key: 'pasien_id'
           }
         },    
         nama: {

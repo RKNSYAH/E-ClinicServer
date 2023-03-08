@@ -21,7 +21,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: { tableName: 'userdata', schema: 'public' },
-          key: 'pasen_id'
+          key: 'pasien_id'
         }
       },
       dokter_id: {
@@ -45,8 +45,17 @@ module.exports = {
         allowNull: true,
         defaultValue: Sequelize.Sequelize.fn('now'),
       },
+      tanggal_perjanjian: {
+        type: Sequelize.DATEONLY,
+        allowNull: true,
+      },
       nomor_pendaftaran: {
         type: Sequelize.BIGINT,
+        allowNull: true
+      },
+      confirmed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
         allowNull: true
       },
     }, {

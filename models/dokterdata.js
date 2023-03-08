@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('./connection.js');
+const { pendaftaran, antrian } = require('./pendaftaranData.js');
 
 const dokter = sequelize.define(
   'dokter',
@@ -13,7 +14,7 @@ const dokter = sequelize.define(
     nik: {
       type: Sequelize.STRING(16),
     },
-    nama: {
+    nama_dokter: {
       type: Sequelize.STRING(50),
     },
     jenis_kelamin: {
@@ -298,4 +299,5 @@ const klinik = sequelize.define(
   klinik.hasMany(klinik_dokter, {foreignKey: 'klinik_id'})
   dokter.hasOne(keahlian, {sourceKey: 'keahlian_id', foreignKey: 'keahlian_id'})
   keahlian.belongsTo(dokter, {foreignKey: 'keahlian_id'})
+
 module.exports = {wilayah, dokter, klinik, poliklinik, klinik_poliklinik, keahlian, klinik_dokter, golongan_darah}
