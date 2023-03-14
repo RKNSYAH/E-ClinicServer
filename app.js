@@ -8,17 +8,28 @@ const login = require('./controller/LoginControl');
 const klinik = require('./controller/KlinikControl');
 const profile = require('./controller/ProfileControl');
 const daftar = require('./controller/DaftarControl');
+const dokter = require('./controller/DokterControl');
+const multer = require('multer')
 const WebSocket = require('ws')
 var useragent = require('express-useragent');
 const { pendaftaran, antrian } = require('./models/pendaftaranData');
 const { v4: uuidv4 } = require('uuid');
-
-app.use(express.urlencoded({extended: true}));
-app.use(useragent.express());
-
 const wss = new WebSocket.Server({port : 8080})
 const userConnections = {};
-
+const storage = multer.diskStorage({ // notice you are calling the multer.diskStorage() method here, not multer()
+  destination: function(req, file, cb) {
+      cb(null, 'uploads/')
+  },
+  filename: function(req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now())
+  }
+});
+const upload = multer({storage});
+app.use(express.urlencoded({extended: true}));
+app.use(express.json())
+app.use(useragent.express());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 wss.on('connection', (ws, req) => {
 
   ws.on('message', (message => {
@@ -28,12 +39,6 @@ wss.on('connection', (ws, req) => {
     return userConnections[data.data] = ws
   }))
 })
-
-app.use(express.json());
-app.use(bodyParser.json());
-
-// parse requests of content-type - application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('/', (req, res) => {
   res.json({alert: 'masuk'});
@@ -53,7 +58,7 @@ app.post('/signup', data.signup);
 app.post('/login', login.login);
 app.post('/auth', login.auth);
 app.get('/rememberauth', login.rememberauth);
-app.post('/update', profile.update);
+app.post('/update',upload.single('gambar'), profile.update);
 app.get('/updatetoken', profile.updatetoken);
 app.post('/profilerefresh', profile.profilerefresh);
 app.post('/logout', login.logout);
@@ -70,6 +75,8 @@ app.post('/forgotPassword', data.forgotPassword)
 app.get('/passwordReset', data.passwordReset)
 app.post('/antrian', daftar.antrian)
 app.post('/setPassword', data.setPassword)
+app.post('/pasien', dokter.pasien)
+app.post('/diagnosa', dokter.diagnosa)
 app.post('/antri', (req, res) => {
   pendaftaran
     .findOne({

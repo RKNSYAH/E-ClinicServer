@@ -9,6 +9,8 @@ const { body, validationResult } = require('express-validator');
 const sendEmail = require('../utils/sendEmail');
 const Sequelize = require('sequelize');
 const useragent = require('express-useragent');
+const NodeCache = require('node-cache')
+const cache = new NodeCache()
 
 exports.findAll = (req, res) => {
   data
@@ -24,6 +26,13 @@ exports.wilayah = (req, res) => {
   // search dari data yang ditampilkan menggunakan parameter query pada url
   // localhost/wilayah?query=bandung
   const query = req.query.query;
+
+  const cachedData = cache.get(query);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+
+
   wilayah.findAll({order: [['wilayah_id', 'ASC']]}).then(data => {
     let currentKota = null;
     let currentKec = null;
@@ -51,8 +60,13 @@ exports.wilayah = (req, res) => {
       let filterData = result.filter(item =>
         item.Kelurahan.toLowerCase().includes(query.toLowerCase()),
       );
+      cache.set(query, filterData);
+
       return res.json(filterData);
     }
+
+    // Cache the response for future requests
+    cache.set(query, result);
 
     return res.json(result);
   });
@@ -154,7 +168,7 @@ exports.forgotPassword = [
     }
     data.findOne({where : Sequelize.where(Sequelize.Sequelize.fn('lower', Sequelize.col('email')), Sequelize.Sequelize.fn('lower', req.body.email))}).then(async (data) => {
       if (!data) {return res.status(404).json({ alert: 'Akun tidak ditemukan'})}
-      const token = await jwt.sign({id: data.pasien_id}, secret_key, {
+      const token = jwt.sign({id: data.pasien_id}, secret_key, {
         expiresIn: '30m',
       })
       const link = `10.10.10.91:5000/passwordReset?token=${token}`

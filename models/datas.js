@@ -56,6 +56,9 @@ const data = sequelize.define(
     pekerjaan: {
       type: Sequelize.STRING,
     },
+    profile: {
+      type: Sequelize.STRING
+    }
   },
   {
     timestamps: false,

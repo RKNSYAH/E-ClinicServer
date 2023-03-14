@@ -61,14 +61,15 @@ exports.auth = (token, deviceName, nik, req, res) => {
   const deviceDetector = new DeviceDetector();
   let device
   let deviceData
+  console.log(source);
   if(deviceName){
     device = deviceDetector.parse(deviceName);
     deviceData = `${device.os.name}, ${device.device.brand}, ${device.device.model}`
   } else{
     device = deviceDetector.parse(source)
-    deviceData = `${device.os.name}, ${device.device.type}, ${device.device.brand || null} ${device.device.model || null}`
+    deviceData = `${device.os.name} ${device.os.version}, ${device.device?.type || null}, ${device.device?.brand || null} ${device.device?.model || null}`
   }
-  console.log(source);
+
   let decodedToken;
   try {
     decodedToken = jwt.verify(token, secret_key);
@@ -111,11 +112,11 @@ exports.auth = (token, deviceName, nik, req, res) => {
           kodewilayah: nik.kodewilayah,
           pekerjaan: nik.pekerjaan,
           jeniskelamin: nik.jeniskelamin,
+          profilePic: nik.profile,
           token: token,
           level: data.level,
         });
       })
-      
     });
 };
 
@@ -168,6 +169,7 @@ exports.rememberauth = (req, res, next) => {
             kodewilayah: nik.kodewilayah,
             pekerjaan: nik.pekerjaan,
             jeniskelamin: nik.jeniskelamin,
+            profilePic: nik.profile,
             token: token,
             level: data.level,
           });

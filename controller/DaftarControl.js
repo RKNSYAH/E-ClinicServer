@@ -72,8 +72,10 @@ exports.nomorPendaftaran = (req, res) => {
 }
 
 exports.antrian = (req, res) => {
+  console.log(req.body.hari);
   antrian
     .findAll({
+      order: [['waktu_antrian', 'ASC']],
       include: [
         {
           model: klinik,
@@ -109,7 +111,7 @@ exports.antrian = (req, res) => {
           dokter: dokter
         };
       });
-      res.json(filterData);
+      res.status(200).json(filterData);
     })
     .catch((err) => {
       console.log(err);

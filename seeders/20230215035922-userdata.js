@@ -35,10 +35,10 @@ module.exports = {
     },
     {
       pasien_id: 'd12de546-b45e-4a31-994b-99dfc8557a68',
-      nik: '1111',
+      nik: '327001',
       password: "$2a$12$.DAgEo1hxfZt0r5kS3oWpegTqjy/iqYNsN5k/urZ80GuUZ.Hsl8wW",
       email: "dokter@gmail.com",
-      namalengkap: "dokter",
+      namalengkap: "Dr. ABC",
     }
   ], {
     schema: 'public'

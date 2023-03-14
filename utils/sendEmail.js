@@ -27,6 +27,18 @@ const sendEmail = async (email, subject, payload, template) => {
         to: email,
         subject: subject,
         html: compiledTemplate(payload),
+        attachments: [
+          {
+          filename: 'fullLogo.png',
+          path: __dirname +'/image/fullLogo.png',
+          cid: 'fullLogo'
+    },
+    {
+      filename: 'resetLogo.png',
+      path: __dirname + '/image/resetLogo.png',
+      cid: 'resetLogo'
+    }
+  ],
       };
     };
 

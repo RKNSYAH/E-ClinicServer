@@ -65,6 +65,9 @@ module.exports = {
         pekerjaan: {
           type: Sequelize.STRING,
         },
+        profile: {
+          type: Sequelize.STRING
+        }
       },
       {
         timestamps: false,
