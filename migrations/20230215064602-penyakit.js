@@ -34,9 +34,6 @@ module.exports = {
             key: 'pasien_id'
           }
         },    
-        nama: {
-          type: Sequelize.STRING(60),
-        }
       },
       {
         timestamps: false,

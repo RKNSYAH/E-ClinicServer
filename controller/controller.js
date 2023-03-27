@@ -14,12 +14,18 @@ const cache = new NodeCache()
 
 exports.findAll = (req, res) => {
   data
-    .count('pasien_id')
-    .then(id => { 
-      res.json({id: id});
+    .count("pasien_id")
+    .then(async (id) => {
+      const datas = await data.findAll({
+        attributes: ['pekerjaan', [Sequelize.fn('count', Sequelize.col('pekerjaan')), 'count']],
+        group: ['pekerjaan'],
+        raw: true,
+        order: [[Sequelize.literal('count DESC')]]
+      });
+      res.json({ id: id, data: datas });
     })
-    .catch(err => {
-      console.log('error', err);
+    .catch((err) => {
+      console.log("error", err);
     });
 };
 exports.wilayah = (req, res) => {
@@ -123,15 +129,11 @@ exports.signup = [
                   namalengkap: req.body.sNamaLengkap,
                   no_telp: req.body.noTelp || null
                 })
-                .then(() => {
-                  data
-                    .findOne({ where: { email: req.body.email } })
-                    .then((user) => {
+                .then((user) => {
                       user_controls.create({
                         id_user: user.pasien_id,
                         level: 1,
                       });
-                    });
                   res.status(200).json({ alert: "Berhasil membuat akun" });
                 })
                 .catch((err) => {

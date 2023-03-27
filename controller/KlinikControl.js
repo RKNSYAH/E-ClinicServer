@@ -48,9 +48,12 @@ exports.getKeahlian = (req, res) => {
 
 //kode kode setelah ini mengambil data spesifik tergantung klinik yang dipilih
 exports.getPoliklinik = (req, res) => {
+
+  const klinikNama = req.params.namaKlinik
+
   klinik
     .findOne({
-      where: {nama_klinik: 'klinik123'}, //akan diubah setelah ada fungsi untuk memilih klinik
+      where: {nama_klinik: klinikNama}, 
       include: [
         {
           model: klinik_poliklinik,

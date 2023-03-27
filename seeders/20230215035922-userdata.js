@@ -34,7 +34,7 @@ module.exports = {
       namalengkap: "Vicky",
     },
     {
-      pasien_id: 'd12de546-b45e-4a31-994b-99dfc8557a68',
+      pasien_id: 'b57ca085-5e35-4628-b04c-28da82c4f96a',
       nik: '327001',
       password: "$2a$12$.DAgEo1hxfZt0r5kS3oWpegTqjy/iqYNsN5k/urZ80GuUZ.Hsl8wW",
       email: "dokter@gmail.com",

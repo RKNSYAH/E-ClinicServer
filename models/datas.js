@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('./connection.js');
 const { pendaftaran, antrian } = require('./pendaftaranData.js');
+const moment = require('moment');
 
 const data = sequelize.define(
   'userdata',
@@ -34,6 +35,9 @@ const data = sequelize.define(
     },
     tanggallahir: {
       type: Sequelize.DATEONLY,
+      get() {
+        return moment(this.getDataValue('tanggallahir')).locale('id').format('YYYY-MM-DD');
+    }
     },
     alamat: {
       type: Sequelize.STRING,

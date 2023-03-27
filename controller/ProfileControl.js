@@ -9,7 +9,7 @@ const { body, validationResult } = require("express-validator");
 const datauri = require('datauri');
 const { link } = require("fs");
 const cloudinary = require('cloudinary').v2;
-
+const moment = require('moment');
 
 exports.updatetoken = (req, res, next) => {
   const authHeader = req.get("Authorization");
@@ -50,15 +50,14 @@ exports.updatetoken = (req, res, next) => {
   });
 };
 
-exports.update = [
+exports.updateData = [
   body("rw").isLength({ max: 3 }).withMessage("RT/RW Tidak Valid").isNumeric(),
   body("rt").isLength({ max: 3 }).withMessage("RT/RW Tidak Valid").isNumeric(),
   body("alamat").escape(true),
   body("kodepos").isNumeric().isLength({ max: 5 }).escape(true),
-  body("tempatlahir").escape(true),
+  body("tempatLahir").escape(true),
   body("namalengkap").escape(true),
-  (req, res) => {
-
+  async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       // console.log(errors);
@@ -67,89 +66,87 @@ exports.update = [
         .json({ alert: errors.array().map((items) => items.msg)[0] });
     }
     cloudinary.config({
-      cloud_name: "dsewyuon0",
-      api_key: "197396117789792",
-      api_secret: "cgMrjCg1HFek47-5Ppg0Si_teEM"
+      cloud_name: process.env.cloud_name,
+      api_key: process.env.api_key,
+      api_secret: process.env.api_secret,
     });
-    
+    console.log(req.body);
+
     const authHeader = req.get("Authorization");
     if (!authHeader) {
       return res.status(401).json({ alert: "Authentication Gagal" });
     }
     const token = authHeader.split(" ")[1];
-    user_controls
-      .findOne({ where: { jwt_token: req.body.keyToken } })
-      .then(async (found) => {
-        if (found) {
-          let decodedToken;
-          try {
-            decodedToken = jwt.verify(token, secret_key);
-          } catch (err) {
-            return res.status(500).json({ alert: "Error token expired." });
-          }
-          if (!decodedToken) {
-            return res.status(401).json({ alert: "Unauthorized" });
-          }
-          if (
-            !req.body.email ||
-            !req.body.namalengkap ||
-            !req.body.tanggalLahir ||
-            !req.body.pekerjaan ||
-            !req.body.rw ||
-            !req.body.rt ||
-            !req.body.alamat ||
-            !req.body.jeniskelamin ||
-            !req.body.kodewilayah ||
-            !req.body.kodepos ||
-            !req.body.tempatLahir
-          ) {
-            return res.status(400).json({ alert: "Tolong lengkapi data anda" });
-          }
-            const result = req.file ?  (await cloudinary.uploader.upload(req.file.path)).secure_url : null
-            // Send the image URL back to the client
-            console.log(result);
 
-          data.update(
-            {
-              namalengkap: req.body.namalengkap,
-              email: req.body.email,
-              tanggallahir: req.body.tanggalLahir,
-              tempatlahir: req.body.tempatLahir,
-              pekerjaan: req.body.pekerjaan,
-              golongandarah: req.body.golongandarah,
-              rt: req.body.rt,
-              rw: req.body.rw,
-              alamat: req.body.alamat,
-              jeniskelamin: req.body.jeniskelamin,
-              kodepos: req.body.kodepos,
-              kodewilayah: req.body.kodewilayah,
-              profile: result
-            },
-            {
-              where: {
-                pasien_id: 'a8b7f602-df79-45a3-ba99-9647f6a1da7c'
-              },
-            }
-          )
-          .then((update) => {
-            if (update){
-              res.status(200).json({ alert: "Berhasil merubah data"});
-            }
-          }).catch(err => {
-            console.log(err);
-          });
-          
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, secret_key);
+    } catch (err) {
+      return res.status(500).json({ alert: "Error token expired." });
+    }
+    if (!decodedToken) {
+      return res.status(401).json({ alert: "Unauthorized" });
+    }
+    if (
+      !req.body.email ||
+      !req.body.namalengkap ||
+      !req.body.tanggalLahir ||
+      !req.body.pekerjaan ||
+      !req.body.rw ||
+      !req.body.rt ||
+      !req.body.alamat ||
+      !req.body.jeniskelamin ||
+      !req.body.kodewilayah ||
+      !req.body.kodepos ||
+      !req.body.tempatLahir
+    ) {
+      return res.status(400).json({ alert: "Tolong lengkapi data anda" });
+    }
+    const result = req.file
+      ? (await cloudinary.uploader.upload(req.file.path)).secure_url
+      : null;
+    // Send the image URL back to the client
+    const payload = {
+      namalengkap: req.body.namalengkap,
+      email: req.body.email,
+      tanggallahir: moment(new Date(req.body.tanggalLahir)).toISOString(),
+      tempatlahir: req.body.tempatLahir,
+      pekerjaan: req.body.pekerjaan,
+      golongandarah: req.body.golongandarah,
+      rt: req.body.rt,
+      rw: req.body.rw,
+      alamat: req.body.alamat,
+      jeniskelamin: req.body.jeniskelamin,
+      kodepos: req.body.kodepos,
+      kodewilayah: req.body.kodewilayah,
+    }
+    if (result) {
+      payload.profile = result;
+    }
+    
+    data
+      .update(
+        payload,
+        {
+          where: {
+            pasien_id: req.body.id,
+          },
+          returning: true,
+        },
 
-        } else {
-          res.status(404).json({ alert: "Akun terhubung pada perangkat lain" });
-        }
+      ).then((updates) => {
+        return res.status(200).json({alert: 'berhasil'})
+      })
+      .catch((err) => {
+        console.log(err);
       });
-  },
+    },
 ];
 
 exports.profilerefresh = (req, res, next) => {
   //refresh data yang tersimpan pada client dengan data terbaru
-  data.findOne({ where: { pasien_id: req.body } }).then((nik) => {
+  console.log(req.body);
+  data.findOne({ where: { pasien_id: req.body.id } }).then((nik) => {
     if (nik) {
       res.status(200).json({
         id: nik.pasien_id,
@@ -166,6 +163,8 @@ exports.profilerefresh = (req, res, next) => {
         kodewilayah: nik.kodewilayah,
         pekerjaan: nik.pekerjaan,
         jeniskelamin: nik.jeniskelamin,
+        profilePic: nik.profile,
+
       });
     }
   });

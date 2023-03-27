@@ -35,5 +35,7 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
+    await queryInterface.dropTable({tableName: 'golongan_darah', schema: 'public'});
+
   }
 };

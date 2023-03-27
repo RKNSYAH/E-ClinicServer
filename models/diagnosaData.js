@@ -26,9 +26,6 @@ const diagnosa = sequelize.define(
             key: 'pasien_id'
           }
         },
-        penyakit: {
-
-        },
         catatan: {
           type: Sequelize.TEXT,
           allowNull: false
@@ -36,6 +33,10 @@ const diagnosa = sequelize.define(
         tanggal_diagnosis: {
           type: Sequelize.DATEONLY
         },
+        dilihat: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false
+        }
       }, {
         tableName: 'diagnosa',
         schema: 'public',
@@ -43,7 +44,7 @@ const diagnosa = sequelize.define(
         indexes: [
           {
             name: "diagnosa_pkey",
-            unique: true,
+            unique: false,
             fields: [
               { name: "diagnosa_id" },
             ]
@@ -56,9 +57,15 @@ const diagnosa = sequelize.define(
 const obat_pasien = sequelize.define(
   "obat_pasien",
   {
+    obat_pasien_id: {
+      type: Sequelize.UUID,
+      primaryKey: true,
+      defaultValue: Sequelize.UUIDV4
+    },
     diagnosa_id: {
       type: Sequelize.UUID,
       primaryKey: true,
+      allowNull: false,
       references: {
         model: { tableName: "diagnosa", schema: "public" },
         key: "diagnosa_id",
@@ -70,6 +77,9 @@ const obat_pasien = sequelize.define(
     jumlah: {
       type: Sequelize.INTEGER,
     },
+    harga: {
+      type: Sequelize.INTEGER,
+    }
   },
   {
     tableName: "obat_pasien",

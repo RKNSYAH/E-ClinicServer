@@ -32,13 +32,20 @@ module.exports = {
           key: 'pasien_id'
         }
       },
+      penyakit_id: {
+        type: Sequelize.UUID,
+      },
       catatan: {
         type: Sequelize.TEXT,
-        allowNull: false
+        allowNull: true
       },
       tanggal_diagnosis: {
         type: Sequelize.DATEONLY
       },
+      dilihat: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      }
     }, {
       tableName: 'diagnosa',
       schema: 'public',
