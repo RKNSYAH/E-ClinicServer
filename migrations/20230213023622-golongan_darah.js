@@ -22,7 +22,18 @@ module.exports = {
         }
       },
       {
+        schema: 'ref',
         timestamps: false,
+        indexes: [
+          {
+            name: "golongan_darah_pkey",
+            unique: true,
+            fields: [
+              { name: "golongan_darah_id" },
+            ]
+          },
+        ]
+  
       },
       )
 
@@ -35,7 +46,7 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.dropTable({tableName: 'golongan_darah', schema: 'public'});
+    await queryInterface.dropTable({tableName: 'golongan_darah', schema: 'ref'});
 
   }
 };

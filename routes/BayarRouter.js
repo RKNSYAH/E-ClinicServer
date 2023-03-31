@@ -3,5 +3,7 @@ const express = require("express")
 
 const router = express.Router()
 
-router.post('/findBayar', pembayaran.findBayar)
+router.get('/findBayar/:diagnosaId', pembayaran.findBayar)
 router.post('/confirmBayar', pembayaran.confirmBayar)
+
+module.exports = router

@@ -27,8 +27,13 @@ const data = sequelize.define(
     namalengkap: {
       type: Sequelize.STRING(50),
     },
-    golongandarah: {
-      type: Sequelize.STRING,
+    golongan_darah_id: {
+      type: Sequelize.BIGINT,
+      allowNull: true,
+      references: {
+        model: {tableName: 'golongan_darah', schema: 'ref'},
+        key: 'golongan_darah_id'
+      }
     },
     tempatlahir: {
       type: Sequelize.STRING,
@@ -118,6 +123,7 @@ const user_controls = sequelize.define('user_controls',{
       tableName: 'user_controls',
       schema: 'users',
       timestamps: false,
+      
       indexes: [
         {
           name: "user_controls_pkey",
@@ -127,6 +133,7 @@ const user_controls = sequelize.define('user_controls',{
           ]
         },
       ]
+      
     })
 
 module.exports = {data, user_controls}

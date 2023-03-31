@@ -12,8 +12,8 @@ exports.confirmBayar = (req, res) => {
     const idPendaftaran = req.body.idPendaftaran
 
     pembayaran.create({
-        pendaftaran_id: diagnosa,
-        diagnosa_id: idPendaftaran,
+        pendaftaran_id: idPendaftaran,
+        diagnosa_id: diagnosa,
         jumlah: jumlah,
     }).then((bayar) => {
         return res.status(200).json({alert: 'Bayar terkonfirmasi'})
@@ -24,8 +24,10 @@ exports.confirmBayar = (req, res) => {
 }
 
 exports.findBayar = (req, res) => {
+    const diagnosaId = req.params.diagnosaId
+
     pembayaran.findOne({
-        where: {diagnosa_id: req.body.diagnosaId}
+        where: {diagnosa_id: diagnosaId}
     }).then((found) => {
         if (found) return res.status(200).send(true)
     })

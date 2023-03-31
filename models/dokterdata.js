@@ -130,6 +130,18 @@ const klinik = sequelize.define(
     },
     {
       timestamps: false,
+      tablename: 'golongan_darah',
+      schema: 'ref',
+      indexes: [
+        {
+          name: "golongan_darah_pkey",
+          unique: true,
+          fields: [
+            { name: "golongan_darah_id" },
+          ]
+        },
+      ]
+
     },
   )
   const keahlian = sequelize.define(

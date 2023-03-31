@@ -9,6 +9,7 @@ const klinikRouter = require('./routes/KlinikRouter');
 const daftarRouter = require('./routes/DaftarRouter');
 const dokterRouter = require('./routes/DokterRouter');
 const pasienRouter = require('./routes/PasienRouter');
+const bayarRouter = require('./routes/BayarRouter');
 
 var useragent = require('express-useragent');
 
@@ -36,6 +37,7 @@ app.use('/pasien',pasienRouter)
 app.use('/profile',profileRouter)
 app.use('/daftar',daftarRouter)
 app.use('/dokter',dokterRouter)
+app.use('/pembayaran',bayarRouter)
 
 const PORT = 5000;
 

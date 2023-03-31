@@ -12,7 +12,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    await queryInterface.bulkInsert({tableName: 'golongan_darah', schema: 'public'}, [
+    await queryInterface.bulkInsert({tableName: 'golongan_darah', schema: 'ref'}, [
       {
 
         nama: 'A'
@@ -51,6 +51,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete({tableName: 'golongan_darah', schema: 'public'}, null, {});
+    await queryInterface.bulkDelete({tableName: 'golongan_darah', schema: 'ref'}, null, {});
   }
 };

@@ -14,5 +14,6 @@ router.post('/forgotPassword', data.forgotPassword)
 router.get('/passwordReset', data.passwordReset)
 router.post('/setPassword', data.setPassword)
 router.get('/darah', data.getGolonganDarah)
+router.get('/count/gDarah', data.countGDarah)
 
 module.exports = router;

@@ -1,15 +1,16 @@
-const {data, user_controls} = require('../models/datas');
+const {user_controls} = require('../models/datas');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const crypto = require('crypto')
 const secret_key = process.env.JWT_SECRET
-const {wilayah, golongan_darah} = require('../models/dokterdata');
+const {wilayah} = require('../models/dokterdata');
 const { body, validationResult } = require('express-validator');
 const sendEmail = require('../utils/sendEmail');
 const Sequelize = require('sequelize');
 const useragent = require('express-useragent');
 const NodeCache = require('node-cache')
+const { data, golongan_darah } = require("../models");
 const cache = new NodeCache()
 
 exports.findAll = (req, res) => {
@@ -39,13 +40,14 @@ exports.wilayah = (req, res) => {
   }
 
 
-  wilayah.findAll({order: [['wilayah_id', 'ASC']]}).then(data => {
+  wilayah.findAll({order: [['wilayah_id', 'ASC']]}).then(async data => {
+
     let currentKota = null;
     let currentKec = null;
     let currentProv = null;
     const result = [];
 
-    for (const item of data) {  //sortir wilayah menjadi {provinsi, kota, kecamatan, kelurahan, kodewilayah}
+    for await (const item of data) {  //sortir wilayah menjadi {provinsi, kota, kecamatan, kelurahan, kodewilayah}
       if (item.id_level_wilayah === '1') {
         currentProv = item.nama;
       } else if (item.id_level_wilayah === '2') {
@@ -83,6 +85,43 @@ exports.getGolonganDarah = (req, res) => {
     return res.json(darah);
   })
 }
+exports.countGDarah = (req, res) => {
+
+  golongan_darah.findAll({
+    order: [['golongan_darah_id', 'ASC']], 
+    attributes: [
+      'golongan_darah_id',
+      'nama',
+      [Sequelize.fn('COALESCE', Sequelize.fn('COUNT', Sequelize.col('userdata.golongan_darah_id')), 0), 'jumlah']
+    ],
+    include: [
+      {
+        model: data,
+        attributes: [],
+      }
+    ],
+    raw: true,
+    group: ['golongan_darah.golongan_darah_id']
+
+  })
+  .then(async results => {
+    const colors = ['#EF6D59', '#7ED321', '#0C95FB', '#6665DD'];
+
+      const result = results.map((item, index) => {
+        return {
+          golongan_darah_id: item.golongan_darah_id,
+          nama: item.nama,
+          jumlah: item.jumlah,
+          warna: colors[index % colors.length]
+        }
+      })
+      res.send(result);
+  })
+  .catch(error => {
+    console.log(error);
+  });
+  
+};
 
 exports.signup = [
   // Validasi data pendaftaran menggunakan express-validator untuk menghindari sql injection

@@ -35,9 +35,15 @@ module.exports = {
         namalengkap: {
           type: Sequelize.STRING(50),
         },
-        golongandarah: {
-          type: Sequelize.STRING,
+        golongan_darah_id: {
+          type: Sequelize.BIGINT,
+          allowNull: true,
+          references: {
+            model: {tableName: 'golongan_darah', schema: 'ref'},
+            key: 'golongan_darah_id'
+          }
         },
+  
         tempatlahir: {
           type: Sequelize.STRING,
         },
